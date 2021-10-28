@@ -332,6 +332,8 @@ type ResourceObject struct {
 type ErrorObject struct {
 	// Title a short, human-readable summary of the problem.
 	Title string `json:"title,omitempty"`
+	// Detail is a more detailed, human-readable description of the problem.
+	Detail string `json:"detail,omitempty"`
 	// Code application specified value to identify the error.
 	Code string `json:"code,omitempty"`
 	// Source an object containing references to the source of the error.
