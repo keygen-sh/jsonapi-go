@@ -235,6 +235,22 @@ type MarshalMeta interface {
 	GetMeta() interface{}
 }
 
+// MarshalExperimentalEmbedded interface should be implemented to be able marshal embedded JSON API relationship data.
+//
+// UseExperimentalEmbeddedRelationshipData example:
+//
+//    type EmbeddedAuthor struct {
+//      Author
+//    }
+//
+//    func(a EmbeddedAuthor) UseExperimentalEmbeddedRelationshipData() bool {
+//      return true
+//    }
+//
+type MarshalExperimentalEmbedded interface {
+	UseExperimentalEmbeddedRelationshipData() bool
+}
+
 // Document describes Go representation of JSON API document.
 type Document struct {
 	// Document data
@@ -259,6 +275,9 @@ type relationship struct {
 type relationshipData struct {
 	One  *ResourceObjectIdentifier
 	Many []*ResourceObjectIdentifier
+
+	ExperimentalEmbeddedOne  *ResourceObject
+	ExperimentalEmbeddedMany []*ResourceObject
 }
 
 // ResourceObjectIdentifier JSON API resource object.
@@ -335,9 +354,18 @@ func (d *documentData) UnmarshalJSON(payload []byte) error {
 }
 
 func (d *relationshipData) MarshalJSON() ([]byte, error) {
+	if d.ExperimentalEmbeddedOne != nil {
+		return json.Marshal(d.ExperimentalEmbeddedOne)
+	}
+
+	if len(d.ExperimentalEmbeddedMany) > 0 {
+		return json.Marshal(d.ExperimentalEmbeddedMany)
+	}
+
 	if d.One != nil && len(d.One.ID) > 0 {
 		return json.Marshal(d.One)
 	}
+
 	return json.Marshal(d.Many)
 }
 
@@ -517,8 +545,13 @@ func marshalRelationshipStruct(payload interface{}) *relationship {
 		Data: &relationshipData{},
 	}
 
-	one := marshalResourceObjectIdentifier(payload.(MarshalResourceIdentifier))
-	relationship.Data.One = &one
+	if asserted, ok := payload.(MarshalExperimentalEmbedded); ok && asserted.UseExperimentalEmbeddedRelationshipData() {
+		one, _ := marshalResourceObject(asserted.(MarshalResourceIdentifier))
+		relationship.Data.ExperimentalEmbeddedOne = &one
+	} else {
+		one := marshalResourceObjectIdentifier(payload.(MarshalResourceIdentifier))
+		relationship.Data.One = &one
+	}
 
 	return relationship
 }
@@ -533,8 +566,19 @@ func marshalRelationshipSlice(payload interface{}) *relationship {
 	value := reflect.ValueOf(payload)
 
 	for i := 0; i < value.Len(); i++ {
-		one := marshalResourceObjectIdentifier(value.Index(i).Interface().(MarshalResourceIdentifier))
-		relationship.Data.Many = append(relationship.Data.Many, &one)
+		inter := value.Index(i).Interface()
+
+		if asserted, ok := inter.(MarshalExperimentalEmbedded); ok && asserted.UseExperimentalEmbeddedRelationshipData() {
+			one, _ := marshalResourceObject(asserted.(MarshalResourceIdentifier))
+			relationship.Data.ExperimentalEmbeddedMany = append(
+				relationship.Data.ExperimentalEmbeddedMany,
+				&one,
+			)
+		} else {
+			one := marshalResourceObjectIdentifier(inter.(MarshalResourceIdentifier))
+			relationship.Data.Many = append(relationship.Data.Many, &one)
+		}
+
 	}
 
 	return relationship

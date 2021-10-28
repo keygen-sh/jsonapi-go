@@ -20,9 +20,9 @@ Go to jsonapi-go package directory and run:
 For instance we have Go program what implements a simple library, we have `Book` and `Author` structs:
 ```go
 type Book struct {
-	ID              string   
-	AuthorID        string   
-	Title           string   
+	ID              string
+	AuthorID        string
+	Title           string
 	PublicationDate time.Time
 }
 
@@ -487,7 +487,7 @@ jsonapi.Unmarshal(booksJSON, &books)
 The output:
 ```go
 _ = Books{
-  {  
+  {
     ID:	"1",
     Type:	"books",
     AuthorID:	"1",

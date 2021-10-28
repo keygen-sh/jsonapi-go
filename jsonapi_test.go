@@ -352,6 +352,70 @@ func (v *ErrorsView) SetErrors(errors []*ErrorObject) error {
 	return nil
 }
 
+type EmbeddedAuthor struct {
+	Author
+}
+
+func (a EmbeddedAuthor) UseExperimentalEmbeddedRelationshipData() bool {
+	return true
+}
+
+type BookWithEmbeddedAuthorView struct {
+	Book BookWithEmbeddedAuthor `json:"-"`
+}
+
+func (v BookWithEmbeddedAuthorView) GetData() interface{} {
+	return v.Book
+}
+
+func (v *BookWithEmbeddedAuthorView) SetData(to func(target interface{}) error) error {
+	return to(&v.Book)
+}
+
+type BookWithEmbeddedAuthor struct {
+	Book
+	Author EmbeddedAuthor `json:"-"`
+}
+
+func (b BookWithEmbeddedAuthor) GetRelationships() map[string]interface{} {
+	return map[string]interface{}{
+		"author": b.Author,
+	}
+}
+
+type EmbeddedReader struct {
+	Reader
+}
+
+func (r EmbeddedReader) UseExperimentalEmbeddedRelationshipData() bool {
+	return true
+}
+
+type EmbeddedReaders []EmbeddedReader
+
+type BookWithEmbeddedReadersView struct {
+	Book BookWithEmbeddedReaders `json:"-"`
+}
+
+func (v BookWithEmbeddedReadersView) GetData() interface{} {
+	return v.Book
+}
+
+func (v *BookWithEmbeddedReadersView) SetData(to func(target interface{}) error) error {
+	return to(&v.Book)
+}
+
+type BookWithEmbeddedReaders struct {
+	Book
+	Readers EmbeddedReaders `json:"-"`
+}
+
+func (b BookWithEmbeddedReaders) GetRelationships() map[string]interface{} {
+	return map[string]interface{}{
+		"readers": b.Readers,
+	}
+}
+
 var _ = Describe("JSONAPI", func() {
 
 	Describe("Marshal", func() {
@@ -517,6 +581,113 @@ var _ = Describe("JSONAPI", func() {
             "relationships": {
               "author": {
                 "data": null
+              }
+            }
+          }
+        }
+      `
+
+			Ω(result).Should(MatchJSON(expected))
+			Ω(err).ShouldNot(HaveOccurred())
+		})
+
+		It("marshals single resource object with an embedded to-one relationship", func() {
+			view := BookWithEmbeddedAuthorView{
+				Book: BookWithEmbeddedAuthor{
+					Book: Book{
+						ID:    "1",
+						Title: "An Introduction to Programming in Go",
+						Year:  "2012",
+						Type:  "books",
+					},
+					Author: EmbeddedAuthor{
+						Author: Author{
+							ID:   "1",
+							Name: "Caleb Doxsey",
+						},
+					},
+				},
+			}
+
+			result, err := Marshal(view)
+
+			expected := `
+        {
+          "data": {
+            "type": "books",
+            "id": "1",
+            "attributes": {
+              "title": "An Introduction to Programming in Go",
+              "year": "2012"
+            },
+            "relationships": {
+              "author": {
+                "data": {
+									"type": "authors",
+									"id": "1",
+									"attributes": {
+										"name": "Caleb Doxsey"
+									}
+								}
+              }
+            }
+          }
+        }
+      `
+
+			Ω(result).Should(MatchJSON(expected))
+			Ω(err).ShouldNot(HaveOccurred())
+		})
+
+		It("marshals single resource object with an embedded to-many relationship", func() {
+			view := BookWithEmbeddedReadersView{
+				Book: BookWithEmbeddedReaders{
+					Book: Book{
+						ID:    "1",
+						Title: "An Introduction to Programming in Go",
+						Year:  "2012",
+						Type:  "books",
+					},
+					Readers: EmbeddedReaders{
+						{
+							Reader{ID: "1", Name: "Fedor Khardikov"},
+						},
+						{
+							Reader{ID: "2", Name: "Andrew Manshin"},
+						},
+					},
+				},
+			}
+
+			result, err := Marshal(view)
+
+			expected := `
+        {
+          "data": {
+            "type": "books",
+            "id": "1",
+            "attributes": {
+              "title": "An Introduction to Programming in Go",
+              "year": "2012"
+            },
+            "relationships": {
+              "readers": {
+                "data": [
+                  {
+                    "type": "people",
+                    "id": "1",
+                    "attributes": {
+                      "name": "Fedor Khardikov"
+                    }
+                  },
+                  {
+                    "type": "people",
+                    "id": "2",
+                    "attributes": {
+                      "name": "Andrew Manshin"
+                    }
+                  }
+                ]
               }
             }
           }
