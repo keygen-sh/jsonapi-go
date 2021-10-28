@@ -5,10 +5,11 @@
 package jsonapi_test
 
 import (
+	"sort"
+
+	. "github.com/keygen-sh/jsonapi-go"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	. "github.com/pieoneers/jsonapi-go"
-	"sort"
 )
 
 type Book struct {

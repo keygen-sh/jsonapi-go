@@ -1,4 +1,4 @@
-module github.com/pieoneers/jsonapi-go
+module github.com/keygen-sh/jsonapi-go
 
 go 1.14
 

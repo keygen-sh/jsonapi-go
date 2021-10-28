@@ -1,14 +1,14 @@
 # jsonapi-go
 # Go jsonapi client
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/pieoneers/jsonapi-go)](https://goreportcard.com/report/github.com/pieoneers/jsonapi-go)
-[![GoDoc](https://godoc.org/github.com/pieoneers/jsonapi-go?status.svg)](https://godoc.org/github.com/pieoneers/jsonapi-go)
+[![Go Report Card](https://goreportcard.com/badge/github.com/keygen-sh/jsonapi-go)](https://goreportcard.com/report/github.com/keygen-sh/jsonapi-go)
+[![GoDoc](https://godoc.org/github.com/keygen-sh/jsonapi-go?status.svg)](https://godoc.org/github.com/keygen-sh/jsonapi-go)
 
 Lightweight [JSON API](https://jsonapi.org/) implementation for Go.
 
 ### Installing
 
-``` go get -u "github.com/pieoneers/jsonapi-go" ```
+``` go get -u "github.com/keygen-sh/jsonapi-go" ```
 
 ### Running the tests
 Go to jsonapi-go package directory and run:
@@ -33,7 +33,7 @@ type Author struct {
 }
 ```
 
-We want to produce the JSON representation of the data. Let's modify the struct by adding json tags to it and implement functions `GetID` and `GetType` as required for [MarshalResourceIdentifier interface](https://godoc.org/github.com/pieoneers/jsonapi-go#MarshalResourceIdentifier), one more function `GetData` required for [MarshalData interface](https://godoc.org/github.com/pieoneers/jsonapi-go#MarshalData).
+We want to produce the JSON representation of the data. Let's modify the struct by adding json tags to it and implement functions `GetID` and `GetType` as required for [MarshalResourceIdentifier interface](https://godoc.org/github.com/keygen-sh/jsonapi-go#MarshalResourceIdentifier), one more function `GetData` required for [MarshalData interface](https://godoc.org/github.com/keygen-sh/jsonapi-go#MarshalData).
 
 ```go
 type Book struct {
@@ -74,7 +74,7 @@ func (a Author) GetData() interface{} {
 }
 ```
 
-By running [Marshal](https://godoc.org/github.com/pieoneers/jsonapi-go#Marshal) function for `Book` and `Author` the output will be a `[]byte` of json data.
+By running [Marshal](https://godoc.org/github.com/keygen-sh/jsonapi-go#Marshal) function for `Book` and `Author` the output will be a `[]byte` of json data.
 
 Initial data:
 ```go
@@ -128,7 +128,7 @@ and
 ```
 
 ##### Relationships
-Add `relationships` to the resource is easy to do by implementing [MarshalRelationships interface](https://godoc.org/github.com/pieoneers/jsonapi-go#MarshalRelationships)
+Add `relationships` to the resource is easy to do by implementing [MarshalRelationships interface](https://godoc.org/github.com/keygen-sh/jsonapi-go#MarshalRelationships)
 e.g. for `Book` we will add `GetRelationships` function.
 ```go
 func (b Book) GetRelationships() map[string]interface{} {
@@ -167,7 +167,7 @@ The `Marshal` output will be:
 ```
 
 ##### Included
-Adding to JSON document `included` is easy by adding function `GetIncluded` it will implement [MarshalIncluded interface](https://godoc.org/github.com/pieoneers/jsonapi-go#MarshalIncluded).
+Adding to JSON document `included` is easy by adding function `GetIncluded` it will implement [MarshalIncluded interface](https://godoc.org/github.com/keygen-sh/jsonapi-go#MarshalIncluded).
 ```go
 func (b Book) GetIncluded() []interface{} {
 	var included []interface{}
@@ -224,7 +224,7 @@ func (b Books) GetIncluded() []interface{} {
 
 ##### Meta
 
-`Book`'s `GetMeta` will implement [MarshalMeta interface](https://godoc.org/github.com/pieoneers/jsonapi-go#MarshalMeta).
+`Book`'s `GetMeta` will implement [MarshalMeta interface](https://godoc.org/github.com/keygen-sh/jsonapi-go#MarshalMeta).
 `meta` section will be added to json document.
 
 ```go
@@ -380,7 +380,7 @@ Here is JSON data:
   	}
   }
 ```
-Let's call [Unmarshal](https://godoc.org/github.com/pieoneers/jsonapi-go#Unmarshal) function.
+Let's call [Unmarshal](https://godoc.org/github.com/keygen-sh/jsonapi-go#Unmarshal) function.
 
 
 ```go
@@ -398,7 +398,7 @@ _ = Book{
   PublicationDate:	2015-01-01 00:00:00 +0000 UTC,
 }
 ```
-But the AuthorID is empty, to set this relationship we should implement [UnmarshalRelationships](https://godoc.org/github.com/pieoneers/jsonapi-go#UnmarshalRelationships) interface, by creating function SetRelationships:
+But the AuthorID is empty, to set this relationship we should implement [UnmarshalRelationships](https://godoc.org/github.com/keygen-sh/jsonapi-go#UnmarshalRelationships) interface, by creating function SetRelationships:
 ```go
 func (b *Book) SetRelationships(relationships map[string]interface{}) error {
 	if relationship, ok := relationships["author"]; ok {
@@ -519,7 +519,7 @@ server.go
 package main
 
 import (
-	"github.com/pieoneers/jsonapi-go"
+	"github.com/keygen-sh/jsonapi-go"
 	"log"
 	"net/http"
 	"time"
@@ -801,7 +801,7 @@ import  (
 	"log"
 	"net/http"
   "time"
-  "github.com/pieoneers/jsonapi-go"
+  "github.com/keygen-sh/jsonapi-go"
 )
 
 type Book struct {

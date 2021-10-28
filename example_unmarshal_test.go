@@ -2,8 +2,9 @@ package jsonapi_test
 
 import (
 	"fmt"
-	"github.com/pieoneers/jsonapi-go"
 	"time"
+
+	"github.com/keygen-sh/jsonapi-go"
 )
 
 var bookJSON = []byte(`
