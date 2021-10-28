@@ -276,6 +276,10 @@ func (v BooksViewWithMeta) GetMeta() interface{} {
 	return v.Meta
 }
 
+func (v *BooksViewWithMeta) SetMeta(to func(target interface{}) error) error {
+	return to(&v.Meta)
+}
+
 type BooksMeta struct {
 	Count int `json:"count"`
 }
@@ -1865,6 +1869,62 @@ var _ = Describe("JSONAPI", func() {
 							Pointer: "/data/attributes/year",
 						},
 					},
+				},
+			}
+
+			_, err := Unmarshal(payload, &result)
+
+			Ω(result).Should(Equal(expected))
+			Ω(err).ShouldNot(HaveOccurred())
+		})
+
+		It("unmarshals meta object", func() {
+			payload := []byte(`
+				{
+					"data": [
+						{
+							"type": "books",
+							"id": "1",
+							"attributes": {
+								"title": "An Introduction to Programming in Go",
+								"year": "2012"
+							}
+						},
+						{
+							"type": "books",
+							"id": "2",
+							"attributes": {
+								"title": "Introducing Go",
+								"year": "2016"
+							}
+						}
+					],
+					"meta": {
+						"count": 2
+					}
+				}
+      `)
+
+			result := BooksViewWithMeta{}
+			expected := BooksViewWithMeta{
+				BooksView: BooksView{
+					Books: Books{
+						{
+							ID:    "1",
+							Title: "An Introduction to Programming in Go",
+							Year:  "2012",
+							Type:  "books",
+						},
+						{
+							ID:    "2",
+							Title: "Introducing Go",
+							Year:  "2016",
+							Type:  "books",
+						},
+					},
+				},
+				Meta: BooksMeta{
+					Count: 2,
 				},
 			}
 

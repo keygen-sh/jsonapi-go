@@ -219,6 +219,27 @@ type MarshalIncluded interface {
 	GetIncluded() []interface{}
 }
 
+// UnmarshalMeta interface should be implemented to be able unmarshal JSON API document meta.
+//
+// SetMeta example:
+//
+//    type BooksViewWithMeta struct {
+//    	BooksView
+//    	Meta BooksMeta `json:"-"`
+//    }
+//
+//    func (v *BooksViewWithMeta) SetMeta(to func(target interface{}) error) error {
+//    	return to(&v.Meta)
+//    }
+//
+//    type BooksMeta struct {
+//    	Count int `json:"count"`
+//    }
+//
+type UnmarshalMeta interface {
+	SetMeta(func(interface{}) error) error
+}
+
 // MarshalMeta interface should be implemented to be able marshal JSON API document meta.
 //
 // GetMeta example:
@@ -641,6 +662,12 @@ func Unmarshal(data []byte, target interface{}) (*Document, error) {
 
 	if asserted, ok := target.(UnmarshalErrors); ok && doc.Errors != nil {
 		asserted.SetErrors(doc.Errors)
+	}
+
+	if asserted, ok := target.(UnmarshalMeta); ok && doc.Meta != nil {
+		asserted.SetMeta(func(target interface{}) error {
+			return json.Unmarshal(doc.Meta, &target)
+		})
 	}
 
 	return doc, nil
