@@ -219,6 +219,44 @@ type MarshalIncluded interface {
 	GetIncluded() []interface{}
 }
 
+// UnmarshalIncluded interface should be implemented to be able unmarshal JSON API document resources.
+//
+// SetIncluded example:
+//
+//    type Library struct {
+//    	ID      string  `json:"-"`
+//    	Type    string  `json:"-"`
+//    	Books   Books   `json:"-"`
+//    	Authors Authors `json:"-"`
+//    }
+//
+//    func (l *Library) SetIncluded(relationships []*ResourceObject, unmarshal func(included *ResourceObject, target interface{}) error) error {
+//    	for _, relationship := range relationships {
+//    		switch relationship.Type {
+//    		case "authors":
+//    			author := &Author{}
+//    			if err := unmarshal(relationship, author); err != nil {
+//    				return err
+//    			}
+//
+//    			l.Authors = append(l.Authors, *author)
+//    		case "books":
+//    			book := &Book{}
+//    			if err := unmarshal(relationship, book); err != nil {
+//    				return err
+//    			}
+//
+//    			l.Books = append(l.Books, *book)
+//    		}
+//    	}
+//
+//    	return nil
+//    }
+//
+type UnmarshalIncluded interface {
+	SetIncluded([]*ResourceObject, func(included *ResourceObject, target interface{}) error) error
+}
+
 // UnmarshalMeta interface should be implemented to be able unmarshal JSON API document meta.
 //
 // SetMeta example:
@@ -669,6 +707,12 @@ func Unmarshal(data []byte, target interface{}) (*Document, error) {
 	if asserted, ok := target.(UnmarshalMeta); ok && doc.Meta != nil {
 		asserted.SetMeta(func(target interface{}) error {
 			return json.Unmarshal(doc.Meta, &target)
+		})
+	}
+
+	if asserted, ok := target.(UnmarshalIncluded); ok && doc.Included != nil {
+		asserted.SetIncluded(doc.Included, func(included *ResourceObject, target interface{}) error {
+			return unmarshalOne(included, target)
 		})
 	}
 

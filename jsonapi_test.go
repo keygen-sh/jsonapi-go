@@ -111,6 +111,7 @@ func (b *BookWithAuthor) SetRelationships(relationships map[string]interface{}) 
 
 type Author struct {
 	ID   string `json:"-"`
+	Type string `json:"-"`
 	Name string `json:"name"`
 }
 
@@ -121,6 +122,22 @@ func (a Author) GetID() string {
 func (a Author) GetType() string {
 	return "authors"
 }
+
+func (a *Author) SetID(id string) error {
+	a.ID = id
+	return nil
+}
+
+func (a *Author) SetType(t string) error {
+	a.Type = t
+	return nil
+}
+
+func (a *Author) SetData(to func(target interface{}) error) error {
+	return to(a)
+}
+
+type Authors []Author
 
 type BookWithReadersView struct {
 	Book BookWithReaders `json:"-"`
@@ -418,6 +435,51 @@ func (b BookWithEmbeddedReaders) GetRelationships() map[string]interface{} {
 	return map[string]interface{}{
 		"readers": b.Readers,
 	}
+}
+
+type Library struct {
+	ID      string  `json:"-"`
+	Type    string  `json:"-"`
+	Name    string  `json:"name"`
+	Books   Books   `json:"-"`
+	Authors Authors `json:"-"`
+}
+
+func (l *Library) SetID(id string) error {
+	l.ID = id
+	return nil
+}
+
+func (l *Library) SetType(t string) error {
+	l.Type = t
+	return nil
+}
+
+func (l *Library) SetData(to func(target interface{}) error) error {
+	return to(l)
+}
+
+func (l *Library) SetIncluded(relationships []*ResourceObject, unmarshal func(included *ResourceObject, target interface{}) error) error {
+	for _, relationship := range relationships {
+		switch relationship.Type {
+		case "authors":
+			author := &Author{}
+			if err := unmarshal(relationship, author); err != nil {
+				return err
+			}
+
+			l.Authors = append(l.Authors, *author)
+		case "books":
+			book := &Book{}
+			if err := unmarshal(relationship, book); err != nil {
+				return err
+			}
+
+			l.Books = append(l.Books, *book)
+		}
+	}
+
+	return nil
 }
 
 var _ = Describe("JSONAPI", func() {
@@ -1929,6 +1991,78 @@ var _ = Describe("JSONAPI", func() {
 			}
 
 			_, err := Unmarshal(payload, &result)
+
+			Ω(result).Should(Equal(expected))
+			Ω(err).ShouldNot(HaveOccurred())
+		})
+
+		It("unmarshals included resources", func() {
+			payload := []byte(`
+				{
+					"data": {
+						"type": "libraries",
+						"id": "1",
+						"attributes": {
+							"name": "The New York Public Library"
+						}
+					},
+					"included": [
+						{
+							"type": "books",
+							"id": "1",
+							"attributes": {
+								"title": "An Introduction to Programming in Go",
+								"year": "2012"
+							}
+						},
+						{
+							"type": "books",
+							"id": "2",
+							"attributes": {
+								"title": "Introducing Go",
+								"year": "2016"
+							}
+						},
+						{
+              "type": "authors",
+              "id": "1",
+              "attributes": {
+                "name": "Caleb Doxsey"
+              }
+            }
+					]
+				}
+      `)
+
+			result := &Library{}
+			expected := &Library{
+				ID:   "1",
+				Type: "libraries",
+				Name: "The New York Public Library",
+				Books: Books{
+					Book{
+						ID:    "1",
+						Title: "An Introduction to Programming in Go",
+						Year:  "2012",
+						Type:  "books",
+					},
+					Book{
+						ID:    "2",
+						Title: "Introducing Go",
+						Year:  "2016",
+						Type:  "books",
+					},
+				},
+				Authors: Authors{
+					Author{
+						ID:   "1",
+						Type: "authors",
+						Name: "Caleb Doxsey",
+					},
+				},
+			}
+
+			_, err := Unmarshal(payload, result)
 
 			Ω(result).Should(Equal(expected))
 			Ω(err).ShouldNot(HaveOccurred())
