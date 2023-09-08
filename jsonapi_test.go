@@ -109,10 +109,30 @@ func (b *BookWithAuthor) SetRelationships(relationships map[string]interface{}) 
 	return nil
 }
 
-type Author struct {
+// author serializes a subset of Author
+type author struct {
 	ID   string `json:"-"`
 	Type string `json:"-"`
 	Name string `json:"name"`
+}
+
+func (a author) GetID() string {
+	return a.ID
+}
+
+func (a author) GetType() string {
+	return "authors"
+}
+
+func (a author) GetData() interface{} {
+	return a
+}
+
+type Author struct {
+	ID    string `json:"-"`
+	Type  string `json:"-"`
+	Name  string `json:"name"`
+	Title string `json:"title,omitempty"`
 }
 
 func (a Author) GetID() string {
@@ -188,9 +208,29 @@ func (b *BookWithReaders) SetRelationships(relationships map[string]interface{})
 	return nil
 }
 
-type Reader struct {
+// reader serializes a subset of Reader
+type reader struct {
 	ID   string `json:"-"`
+	Type string `json:"-"`
 	Name string `json:"name"`
+}
+
+func (r reader) GetID() string {
+	return r.ID
+}
+
+func (r reader) GetType() string {
+	return "people"
+}
+
+func (r reader) GetData() interface{} {
+	return r
+}
+
+type Reader struct {
+	ID    string `json:"-"`
+	Name  string `json:"name"`
+	Title string `json:"title,omitempty"`
 }
 
 func (r Reader) GetID() string {
@@ -381,6 +421,10 @@ func (a EmbeddedAuthor) UseExperimentalEmbeddedRelationshipData() bool {
 	return true
 }
 
+func (a EmbeddedAuthor) GetData() interface{} {
+	return author{ID: a.ID, Name: a.Name}
+}
+
 type BookWithEmbeddedAuthorView struct {
 	Book BookWithEmbeddedAuthor `json:"-"`
 }
@@ -410,6 +454,10 @@ type EmbeddedReader struct {
 
 func (r EmbeddedReader) UseExperimentalEmbeddedRelationshipData() bool {
 	return true
+}
+
+func (r EmbeddedReader) GetData() interface{} {
+	return reader{ID: r.ID, Name: r.Name}
 }
 
 type EmbeddedReaders []EmbeddedReader
@@ -668,8 +716,9 @@ var _ = Describe("JSONAPI", func() {
 					},
 					Author: EmbeddedAuthor{
 						Author: Author{
-							ID:   "1",
-							Name: "Caleb Doxsey",
+							ID:    "1",
+							Name:  "Caleb Doxsey",
+							Title: "Dr",
 						},
 					},
 				},
@@ -716,7 +765,7 @@ var _ = Describe("JSONAPI", func() {
 					},
 					Readers: EmbeddedReaders{
 						{
-							Reader{ID: "1", Name: "Fedor Khardikov"},
+							Reader{ID: "1", Name: "Fedor Khardikov", Title: "Dr"},
 						},
 						{
 							Reader{ID: "2", Name: "Andrew Manshin"},

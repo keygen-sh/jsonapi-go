@@ -594,7 +594,14 @@ func marshalRelationshipStruct(payload interface{}) *relationship {
 	}
 
 	if asserted, ok := payload.(MarshalExperimentalEmbedded); ok && asserted.UseExperimentalEmbeddedRelationshipData() {
-		one, _ := marshalResourceObject(asserted.(MarshalResourceIdentifier))
+		var one ResourceObject
+
+		if asserted, ok := asserted.(MarshalData); ok {
+			one, _ = marshalResourceObject(asserted.GetData().(MarshalResourceIdentifier))
+		} else {
+			one, _ = marshalResourceObject(asserted.(MarshalResourceIdentifier))
+		}
+
 		relationship.Data.ExperimentalEmbeddedOne = &one
 	} else {
 		one := marshalResourceObjectIdentifier(payload.(MarshalResourceIdentifier))
@@ -617,7 +624,14 @@ func marshalRelationshipSlice(payload interface{}) *relationship {
 		inter := value.Index(i).Interface()
 
 		if asserted, ok := inter.(MarshalExperimentalEmbedded); ok && asserted.UseExperimentalEmbeddedRelationshipData() {
-			one, _ := marshalResourceObject(asserted.(MarshalResourceIdentifier))
+			var one ResourceObject
+
+			if asserted, ok := asserted.(MarshalData); ok {
+				one, _ = marshalResourceObject(asserted.GetData().(MarshalResourceIdentifier))
+			} else {
+				one, _ = marshalResourceObject(asserted.(MarshalResourceIdentifier))
+			}
+
 			relationship.Data.ExperimentalEmbeddedMany = append(
 				relationship.Data.ExperimentalEmbeddedMany,
 				&one,
