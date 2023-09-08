@@ -17,22 +17,21 @@ const ContentType = "application/vnd.api+json"
 //
 // GetID example:
 //
-//    func(s SomeStruct) GetID() string {
-//      return s.ID
-//    }
+//	func(s SomeStruct) GetID() string {
+//	  return s.ID
+//	}
 //
 // GetType examples:
 //
-//    func(s SomeStruct) GetType() string {
-//      return d.Type
-//    }
+//	func(s SomeStruct) GetType() string {
+//	  return d.Type
+//	}
 //
-//    or
+//	or
 //
-//    func(s SomeStruct) GetType() string {
-//      return "some-resource-type"
-//    }
-//
+//	func(s SomeStruct) GetType() string {
+//	  return "some-resource-type"
+//	}
 type MarshalResourceIdentifier interface {
 	GetID() string
 	GetType() string
@@ -42,22 +41,21 @@ type MarshalResourceIdentifier interface {
 //
 // SetID, SetType examples:
 //
-//    func(s *SomeStruct) SetID(id string) error {
-//      s.ID = id
-//      return nil
-//    }
+//	func(s *SomeStruct) SetID(id string) error {
+//	  s.ID = id
+//	  return nil
+//	}
 //
-//    func(s *SomeStruct) SetType(t string) error {
-//      s.Type = t
-//      return nil
-//    }
+//	func(s *SomeStruct) SetType(t string) error {
+//	  s.Type = t
+//	  return nil
+//	}
 //
 // or
 //
-//    func(s *SomeStruct) SetType(string) error {
-//      return nil
-//    }
-//
+//	func(s *SomeStruct) SetType(string) error {
+//	  return nil
+//	}
 type UnmarshalResourceIdentifier interface {
 	SetID(string) error
 	SetType(string) error
@@ -67,17 +65,16 @@ type UnmarshalResourceIdentifier interface {
 //
 // GetRelationships example:
 //
-//    func(s SomeStruct) GetRelationships() map[string]interface{} {
-//      relationships := make(map[string]interface{})
+//	func(s SomeStruct) GetRelationships() map[string]interface{} {
+//	  relationships := make(map[string]interface{})
 //
-//      relationships["relation"] = jsonapi.ResourceObjectIdentifier{
-//        ID: s.RelationID,
-//        Type: "relation-type",
-//      }
+//	  relationships["relation"] = jsonapi.ResourceObjectIdentifier{
+//	    ID: s.RelationID,
+//	    Type: "relation-type",
+//	  }
 //
-//      return relationships
-//    }
-//
+//	  return relationships
+//	}
 type MarshalRelationships interface {
 	GetRelationships() map[string]interface{}
 }
@@ -86,14 +83,13 @@ type MarshalRelationships interface {
 //
 // SetRelationships example:
 //
-//    func (s *SomeStruct) SetRelationships(relationships map[string]interface{}) error {
-//    	if relationship, ok := relationships["relation"]; ok {
-//    		s.RealtionID = relationship.(*jsonapi.ResourceObjectIdentifier).ID
-//    	}
+//	func (s *SomeStruct) SetRelationships(relationships map[string]interface{}) error {
+//		if relationship, ok := relationships["relation"]; ok {
+//			s.RealtionID = relationship.(*jsonapi.ResourceObjectIdentifier).ID
+//		}
 //
-//    	return nil
-//    }
-//
+//		return nil
+//	}
 type UnmarshalRelationships interface {
 	SetRelationships(map[string]interface{}) error
 }
@@ -102,10 +98,9 @@ type UnmarshalRelationships interface {
 //
 // GetData example:
 //
-//    func(s SomeStruct) GetData() interface{} {
-//      return s
-//    }
-//
+//	func(s SomeStruct) GetData() interface{} {
+//	  return s
+//	}
 type MarshalData interface {
 	GetData() interface{}
 }
@@ -114,19 +109,18 @@ type MarshalData interface {
 //
 // SetData example:
 //
-//    func(s *SomeStruct) SetData(to func(target interface{}) error) error {
-//      return to(s)
-//    }
+//	func(s *SomeStruct) SetData(to func(target interface{}) error) error {
+//	  return to(s)
+//	}
 //
 // NOTE: If you are using SomeStruct collections, you should implement additional data type, e.g.:
 // type SomeStructs []SomeStruct
 //
 // Then you should implement SetData method for SomeStructs:
 //
-//    func(s *SomeStructs) SetData(to func(target interface{}) error) error {
-//      return to(s)
-//    }
-//
+//	func(s *SomeStructs) SetData(to func(target interface{}) error) error {
+//	  return to(s)
+//	}
 type UnmarshalData interface {
 	SetData(func(interface{}) error) error
 }
@@ -135,30 +129,29 @@ type UnmarshalData interface {
 //
 // GetErrors example:
 //
-//    type SomeErrorType struct {
-//      Code string
-//      Title string
-//      Pointer string
-//    }
+//	type SomeErrorType struct {
+//	  Code string
+//	  Title string
+//	  Pointer string
+//	}
 //
-//    type SomeErrorTypes []SomeErrorType
+//	type SomeErrorTypes []SomeErrorType
 //
-//    func(e SomeErrors) GetErrors() []*jsonapi.ErrorObject {
-//      var errs []*jsonapi.ErrorObject
+//	func(e SomeErrors) GetErrors() []*jsonapi.ErrorObject {
+//	  var errs []*jsonapi.ErrorObject
 //
-//      for _, err := range e {
-//        errs = append(errs, &jsonapi.ErrorObject{
-//          Title: err.Title,
-//          Code: err.Code,
-//          Source: jsonapi.ErrorObjectSource{
-//            Pointer: err.Pointer,
-//          },
-//        })
-//      }
+//	  for _, err := range e {
+//	    errs = append(errs, &jsonapi.ErrorObject{
+//	      Title: err.Title,
+//	      Code: err.Code,
+//	      Source: jsonapi.ErrorObjectSource{
+//	        Pointer: err.Pointer,
+//	      },
+//	    })
+//	  }
 //
-//      return errs
-//    }
-//
+//	  return errs
+//	}
 type MarshalErrors interface {
 	GetErrors() []*ErrorObject
 }
@@ -167,32 +160,31 @@ type MarshalErrors interface {
 //
 // SetErrors example:
 //
-//   type SomeError struct {
-//      Code string
-//      Title string
-//      Pointer string
-//    }
+//	type SomeError struct {
+//	   Code string
+//	   Title string
+//	   Pointer string
+//	 }
 //
-//   type SomeErrors struct {
-//     Errors []SomeError
-//   }
+//	type SomeErrors struct {
+//	  Errors []SomeError
+//	}
 //
-//   func(v SomeErrors) SetErrors(errs []*jsonapi.ErrorObject) error {
-//     var someErrors []SomeError
+//	func(v SomeErrors) SetErrors(errs []*jsonapi.ErrorObject) error {
+//	  var someErrors []SomeError
 //
-//     for _, err := range errs {
-//       someErrors = append(someErrors, SomeError{
-//         Title: err.Title,
-//         Code: err.Code,
-//         Pointer: err.Source.Pointer,
-//       })
-//     }
+//	  for _, err := range errs {
+//	    someErrors = append(someErrors, SomeError{
+//	      Title: err.Title,
+//	      Code: err.Code,
+//	      Pointer: err.Source.Pointer,
+//	    })
+//	  }
 //
-//     v.Errors = someErrors
+//	  v.Errors = someErrors
 //
-//     return nil
-//   }
-//
+//	  return nil
+//	}
 type UnmarshalErrors interface {
 	SetErrors(errors []*ErrorObject) error
 }
@@ -201,20 +193,19 @@ type UnmarshalErrors interface {
 //
 // GetIncluded example:
 //
-//    func(v SomeStruct) GetIncluded() []interface{} {
-//      var included []interface{}
+//	func(v SomeStruct) GetIncluded() []interface{} {
+//	  var included []interface{}
 //
-//      /*
-//        Get some additional data here and put it into `items` variables
-//      `items` data type should implement MarshalResourceIdentifier and MarshalData interface.
-//      */
-//      for _, item := range items {
-//        included = append(included, item)
-//      }
+//	  /*
+//	    Get some additional data here and put it into `items` variables
+//	  `items` data type should implement MarshalResourceIdentifier and MarshalData interface.
+//	  */
+//	  for _, item := range items {
+//	    included = append(included, item)
+//	  }
 //
-//      return included
-//    }
-//
+//	  return included
+//	}
 type MarshalIncluded interface {
 	GetIncluded() []interface{}
 }
@@ -223,36 +214,35 @@ type MarshalIncluded interface {
 //
 // SetIncluded example:
 //
-//    type Library struct {
-//    	ID      string  `json:"-"`
-//    	Type    string  `json:"-"`
-//    	Books   Books   `json:"-"`
-//    	Authors Authors `json:"-"`
-//    }
+//	type Library struct {
+//		ID      string  `json:"-"`
+//		Type    string  `json:"-"`
+//		Books   Books   `json:"-"`
+//		Authors Authors `json:"-"`
+//	}
 //
-//    func (l *Library) SetIncluded(relationships []*ResourceObject, unmarshal func(included *ResourceObject, target interface{}) error) error {
-//    	for _, relationship := range relationships {
-//    		switch relationship.Type {
-//    		case "authors":
-//    			author := &Author{}
-//    			if err := unmarshal(relationship, author); err != nil {
-//    				return err
-//    			}
+//	func (l *Library) SetIncluded(relationships []*ResourceObject, unmarshal func(included *ResourceObject, target interface{}) error) error {
+//		for _, relationship := range relationships {
+//			switch relationship.Type {
+//			case "authors":
+//				author := &Author{}
+//				if err := unmarshal(relationship, author); err != nil {
+//					return err
+//				}
 //
-//    			l.Authors = append(l.Authors, *author)
-//    		case "books":
-//    			book := &Book{}
-//    			if err := unmarshal(relationship, book); err != nil {
-//    				return err
-//    			}
+//				l.Authors = append(l.Authors, *author)
+//			case "books":
+//				book := &Book{}
+//				if err := unmarshal(relationship, book); err != nil {
+//					return err
+//				}
 //
-//    			l.Books = append(l.Books, *book)
-//    		}
-//    	}
+//				l.Books = append(l.Books, *book)
+//			}
+//		}
 //
-//    	return nil
-//    }
-//
+//		return nil
+//	}
 type UnmarshalIncluded interface {
 	SetIncluded([]*ResourceObject, func(included *ResourceObject, target interface{}) error) error
 }
@@ -261,19 +251,18 @@ type UnmarshalIncluded interface {
 //
 // SetMeta example:
 //
-//    type BooksViewWithMeta struct {
-//    	BooksView
-//    	Meta BooksMeta `json:"-"`
-//    }
+//	type BooksViewWithMeta struct {
+//		BooksView
+//		Meta BooksMeta `json:"-"`
+//	}
 //
-//    func (v *BooksViewWithMeta) SetMeta(to func(target interface{}) error) error {
-//    	return to(&v.Meta)
-//    }
+//	func (v *BooksViewWithMeta) SetMeta(to func(target interface{}) error) error {
+//		return to(&v.Meta)
+//	}
 //
-//    type BooksMeta struct {
-//    	Count int `json:"count"`
-//    }
-//
+//	type BooksMeta struct {
+//		Count int `json:"count"`
+//	}
 type UnmarshalMeta interface {
 	SetMeta(func(interface{}) error) error
 }
@@ -282,14 +271,13 @@ type UnmarshalMeta interface {
 //
 // GetMeta example:
 //
-//    type Meta struct {
-//      Count int `json:"count"`
-//    }
+//	type Meta struct {
+//	  Count int `json:"count"`
+//	}
 //
-//    func(v SomeStruct) GetMeta() interface{} {
-//      return Meta{ Count: 42 }
-//    }
-//
+//	func(v SomeStruct) GetMeta() interface{} {
+//	  return Meta{ Count: 42 }
+//	}
 type MarshalMeta interface {
 	GetMeta() interface{}
 }
@@ -298,14 +286,13 @@ type MarshalMeta interface {
 //
 // UseExperimentalEmbeddedRelationshipData example:
 //
-//    type EmbeddedAuthor struct {
-//      Author
-//    }
+//	type EmbeddedAuthor struct {
+//	  Author
+//	}
 //
-//    func(a EmbeddedAuthor) UseExperimentalEmbeddedRelationshipData() bool {
-//      return true
-//    }
-//
+//	func(a EmbeddedAuthor) UseExperimentalEmbeddedRelationshipData() bool {
+//	  return true
+//	}
 type MarshalExperimentalEmbedded interface {
 	UseExperimentalEmbeddedRelationshipData() bool
 }
